@@ -1,40 +1,49 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 
 /// <summary>
-/// Export List<T> to excel to Download in webform
+/// Summary description for OutputExcel
 /// </summary>
 public class OutputExcel
 {
     public static void ResponseExcel<T>(System.Web.HttpResponse response, List<T> items)
     {
-        var dt = ToDataTable(items);
-        string attachment = "attachment; filename=Excel.xls";
-        response.ClearContent();
-        response.AddHeader("content-disposition", attachment);
-        response.ContentType = "application/vnd.ms-excel";
-        string tab = "";
-        foreach (DataColumn dc in dt.Columns)
+        try
         {
-            response.Write(tab + dc.ColumnName);
-            tab = "\t";
-        }
-        response.Write("\n");
-        int i;
-        foreach (DataRow dr in dt.Rows)
-        {
-            tab = "";
-            for (i = 0; i < dt.Columns.Count; i++)
+            var dt = ToDataTable(items);
+            string attachment = "attachment; filename=vauExcel.xls";
+            response.ClearContent();
+            response.AddHeader("content-disposition", attachment);
+            response.ContentType = "application/vnd.ms-excel";
+            string tab = "";
+            foreach (DataColumn dc in dt.Columns)
             {
-                response.Write(tab + dr[i].ToString());
+                response.Write(tab + dc.ColumnName);
                 tab = "\t";
             }
             response.Write("\n");
+            int i;
+            foreach (DataRow dr in dt.Rows)
+            {
+                tab = "";
+                for (i = 0; i < dt.Columns.Count; i++)
+                {
+                    response.Write(tab + dr[i].ToString());
+                    tab = "\t";
+                }
+                response.Write("\n");
+            }
+            response.Flush();
+            response.Close();
         }
-        response.Flush();
-        response.Close();
+        catch (Exception ex)
+        {
+            throw ex;
+        }
     }
+
     public static DataTable ToDataTable<T>(List<T> items)
     {
         DataTable dataTable = new DataTable(typeof(T).Name);
