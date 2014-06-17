@@ -68,4 +68,46 @@ public class OutputExcel
         //put a breakpoint here and check datatable
         return dataTable;
     }
+    
+        public static void NewResponseExcel<T>(System.Web.HttpResponse response, List<T> items)
+    {
+        try
+        {
+            string attachment = "attachment; filename=vauExcel.xls";
+            response.ClearContent();
+            response.AddHeader("content-disposition", attachment);
+            response.ContentType = "application/vnd.ms-excel";
+            string tab = "";
+
+            //Get all the properties
+            PropertyInfo[] Props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            foreach (PropertyInfo prop in Props)
+            {
+                response.Write(tab + prop.Name);
+                tab = "\t";
+            }
+            response.Write("\n");
+            foreach (T item in items)
+            {
+                var values = new object[Props.Length];
+                for (int i = 0; i < Props.Length; i++)
+                {
+                    values[i] = Props[i].GetValue(item, null);
+                    if (values[i] != null)
+                        response.Write(values[i].ToString().Trim() + "\t");
+                    else
+                        response.Write("\t");
+
+                }
+                response.Write("\n");
+            }
+            response.Flush();
+            response.Close();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    
 }
